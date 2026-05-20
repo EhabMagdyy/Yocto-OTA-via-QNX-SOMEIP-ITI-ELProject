@@ -132,22 +132,12 @@ sudo route add -net 224.0.0.0 netmask 240.0.0.0 dev eno1
 ssh root@192.168.50.100
 
 # Create symlinks for CommonAPI libraries
-ln -sf /usr/usr/lib/libCommonAPI.so.3 /usr/usr/lib/libCommonAPI.so.3.2.4
-ln -sf /usr/usr/lib/libCommonAPI-SomeIP.so.3 /usr/usr/lib/libCommonAPI-SomeIP.so.3.2.4
 ln -sf /system/usr/lib/libCommonAPI.so.3 /system/usr/lib/libCommonAPI.so.3.2.4
 ln -sf /system/usr/lib/libCommonAPI-SomeIP.so.3 /system/usr/lib/libCommonAPI-SomeIP.so.3.2.4
 ln -sf /system/usr/lib/libboost_thread.so.1.82.0 /system/usr/lib/libboost_thread.so
 ln -sf /system/usr/lib/libboost_thread.so.1.82.0 /system/usr/lib/libboost_thread.so.1.82.0
 ln -sf /system/usr/lib/libboost_system.so.1.82.0 /system/usr/lib/libboost_system.so
 ln -sf /system/usr/lib/libboost_thread.so.1.82.0 /system/usr/lib/libboost_thread.so
-ln -sf /usr/usr/lib/libCommonAPI-SomeIP.so /usr/local/lib/commonapi/libCommonAPI-SomeIP.so
-ln -sf /usr/usr/lib/libCommonAPI-SomeIP.so.3 /usr/local/lib/commonapi/libCommonAPI-SomeIP.so.3
-ln -sf /usr/usr/lib/libvsomeip3.so.3 /usr/lib/libvsomeip3.so.3
-ln -sf /usr/usr/lib/libvsomeip3.so /usr/lib/libvsomeip3.so
-ln -sf /usr/usr/lib/libvsomeip3-cfg.so.3 /usr/lib/libvsomeip3-cfg.so.3
-ln -sf /usr/usr/lib/libvsomeip3-cfg.so /usr/lib/libvsomeip3-cfg.so
-ln -sf /usr/usr/lib/libboost_filesystem.so.1.82.0 /usr/lib/libboost_filesystem.so.1.82.0
-ln -sf /usr/usr/lib/libboost_*.so* /usr/lib/
 
 # Create vsomeip socket directory
 mkdir -p /var/vsomeip
@@ -157,7 +147,7 @@ chmod 777 /var/vsomeip
 cat > /etc/commonapi.ini << 'EOF'
 [default]
 binding=someip
-libpath=/usr/usr/lib
+libpath=/system/usr/lib
 EOF
 
 
@@ -187,24 +177,6 @@ sudo tcpdump -i eno1 port 30490 -nvv -XX
 
 ## May be needed
 
-```sh
-[root@ehabqnx /system/comapiclient]# ls /usr/lib | grep some
-libvsomeip3-cfg.so
-libvsomeip3-cfg.so.3
-libvsomeip3.so
-libvsomeip3.so.3
-```
-```sh
-[root@ehabqnx /system/comapiclient]# ls /usr/usr/lib | grep some
-libvsomeip3-cfg.so
-libvsomeip3-cfg.so.3
-libvsomeip3-e2e.so
-libvsomeip3-e2e.so.3
-libvsomeip3-sd.so
-libvsomeip3-sd.so.3
-libvsomeip3.so
-libvsomeip3.so.3
-```
 ```sh
 [root@ehabqnx /system/comapiclient]# ls /system/usr/lib | grep some
 libvsomeip3-cfg.so
