@@ -1,0 +1,8 @@
+{
+    "commonapi.Hello" : {
+        "service_id": 4660,
+        "instances" : {
+            "commonapi.Hello": 22136
+        }
+    }
+}
