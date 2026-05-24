@@ -1,0 +1,25 @@
+package commonapi
+
+interface Ota {
+    version { major 1 minor 0 }
+
+    method confirmReceived {
+        in {
+            String status    // "accepted" | "rejected"
+        }
+    }
+
+    broadcast otaAvailable {
+        out {
+            String sha256
+            UInt64 size
+        }
+    }
+
+    broadcast otaStatus {
+        out {
+            String status    // "scp_started" | "scp_done" | "flashing" | "done" | "error"
+            String message
+        }
+    }
+}

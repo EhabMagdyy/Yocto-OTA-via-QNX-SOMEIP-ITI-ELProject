@@ -1,0 +1,8 @@
+{
+    "commonapi.Ota" : {
+        "service_id": 4661,
+        "instances" : {
+            "commonapi.Ota": 22137
+        }
+    }
+}

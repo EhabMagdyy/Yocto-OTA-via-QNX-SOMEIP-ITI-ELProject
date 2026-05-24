@@ -1,0 +1,33 @@
+import "platform:/plugin/org.genivi.commonapi.someip/deployment/CommonAPI-4-SOMEIP_deployment_spec.fdepl"
+import "ota.fidl"
+
+define org.genivi.commonapi.someip.deployment for interface commonapi.Ota {
+    SomeIpServiceID = 4661
+
+    method confirmReceived {
+        SomeIpMethodID = 6001
+        SomeIpReliable = true
+    }
+
+    broadcast otaAvailable {
+        SomeIpEventID = 38007
+        SomeIpEventGroups = { 7003 }
+        SomeIpReliable = true
+    }
+
+    broadcast otaStatus {
+        SomeIpEventID = 38008
+        SomeIpEventGroups = { 7003 }
+        SomeIpReliable = true
+    }
+}
+
+define org.genivi.commonapi.someip.deployment for provider as Service {
+    instance commonapi.Ota {
+        InstanceId = "commonapi.Ota"
+        SomeIpInstanceID = 22137
+        SomeIpUnicastAddress = "192.168.50.100"
+        SomeIpReliableUnicastPort = 30500
+        SomeIpUnreliableUnicastPort = 30500
+    }
+}
