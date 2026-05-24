@@ -91,24 +91,21 @@ ip route add 224.0.0.0/4 dev eth0
 
 ---
 
-## Running the System
+## Test Connection
 
-```bash
-/system/capi-ota/runQnx.sh
+1. Connect QNX (RPi4b) with Yocto (RPi3b+) via Ethernet
+2. Both must have a static ips assigned
+3. Test Connection:
 
-# To Kill on QNX
-CTRL+Z
-slay -s KILL runQnx
+```sh
+# on yocto
+ping 192.168.50.100
 
-# To Kill
-CTRL+Z
-sudo killall -9 runQnx
+# on qnx
+ping 192.168.50.50
 ```
 
 ---
 
-### Run Yocto
+## Running the System
 
-```bash
-/capi-ota/runYocto.sh
-```
