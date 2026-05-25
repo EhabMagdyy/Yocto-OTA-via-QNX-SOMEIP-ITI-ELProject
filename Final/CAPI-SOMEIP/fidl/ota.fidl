@@ -3,22 +3,21 @@ package commonapi
 interface Ota {
     version { major 1 minor 0 }
 
-    method confirmReceived {
+    // QNX (Client) calls this to tell Yocto (Server) the OTA is ready.
+    method triggerOta {
         in {
-            String status    // "accepted" | "rejected"
-        }
-    }
-
-    broadcast otaAvailable {
-        out {
             String sha256
             UInt64 size
         }
+        out {
+            String status // Yocto replies "accepted" or "rejected"
+        }
     }
 
-    broadcast otaStatus {
-        out {
-            String status    // "scp_started" | "scp_done" | "flashing" | "done" | "error"
+    // QNX (Client) calls this to push status updates to Yocto.
+    method updateStatus {
+        in {
+            String status
             String message
         }
     }

@@ -32,6 +32,7 @@ cmake --build build-qnx -j$(nproc)
 ### Yocto - Cross-Compilation
 
 ```bash
+rm -r build-yocto
 mkdir build-yocto && cd build-yocto
 
 cmake \
@@ -55,9 +56,9 @@ mkdir -p /var/vsomeip
 chmod 777 /var/vsomeip
 
 # Copy executable, config and script
-scp build-qnx/qnxService     root@192.168.50.100:/system/capi-ota/
-scp runQnx.sh                root@192.168.50.100:/system/capi-ota/
-scp config/qnx-config.json   root@192.168.50.100:/system/capi-ota/
+scp build-qnx/qnxService     root@192.168.1.15:/system/capi-ota/
+scp runQnx.sh                root@192.168.1.15:/system/capi-ota/
+scp config/qnx-config.json   root@192.168.1.15:/system/capi-ota/
 
 # CommonAPI runtime config
 cat > /etc/commonapi.ini << 'EOF'
@@ -73,10 +74,10 @@ EOF
 
 ```bash
 # Deploy binary and config files
-scp build-yocto/yoctoService     root@192.168.50.50:/capi-ota/
-scp config/yocto-config.json     root@192.168.50.50:/capi-ota/
-scp commonapi.ini                root@192.168.50.50:/capi-ota/
-scp runYocto.sh                  root@192.168.50.50:/capi-ota/
+scp build-yocto/yoctoService     root@192.168.1.100:/capi-ota/
+scp config/yocto-config.json     root@192.168.1.100:/capi-ota/
+scp commonapi.ini                root@192.168.1.100:/capi-ota/
+scp runYocto.sh                  root@192.168.1.100:/capi-ota/
 ```
 
 > vsomeip service discovery uses UDP multicast. Add the route once per boot:
@@ -109,3 +110,15 @@ ping 192.168.50.50
 
 ## Running the System
 
+### QNX
+```sh
+route add -net 224.0.0.0 -netmask 240.0.0.0 192.168.50.100
+
+```
+
+### Yocto
+```sh
+route add -net 224.0.0.0 netmask 240.0.0.0 dev eth0
+
+
+```

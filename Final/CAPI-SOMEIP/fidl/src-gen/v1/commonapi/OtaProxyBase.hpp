@@ -21,7 +21,6 @@
 
 #include <vector>
 
-#include <CommonAPI/Event.hpp>
 #include <CommonAPI/Proxy.hpp>
 #include <functional>
 #include <future>
@@ -37,19 +36,14 @@ namespace commonapi {
 class OtaProxyBase
     : virtual public CommonAPI::Proxy {
 public:
-    typedef CommonAPI::Event<
-        std::string, uint64_t
-    > OtaAvailableEvent;
-    typedef CommonAPI::Event<
-        std::string, std::string
-    > OtaStatusEvent;
 
-    typedef std::function<void(const CommonAPI::CallStatus&)> ConfirmReceivedAsyncCallback;
+    typedef std::function<void(const CommonAPI::CallStatus&, const std::string&)> TriggerOtaAsyncCallback;
+    typedef std::function<void(const CommonAPI::CallStatus&)> UpdateStatusAsyncCallback;
 
-    virtual void confirmReceived(std::string _status, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info = nullptr) = 0;
-    virtual std::future<CommonAPI::CallStatus> confirmReceivedAsync(const std::string &_status, ConfirmReceivedAsyncCallback _callback = nullptr, const CommonAPI::CallInfo *_info = nullptr) = 0;
-    virtual OtaAvailableEvent& getOtaAvailableEvent() = 0;
-    virtual OtaStatusEvent& getOtaStatusEvent() = 0;
+    virtual void triggerOta(std::string _sha256, uint64_t _size, CommonAPI::CallStatus &_internalCallStatus, std::string &_status, const CommonAPI::CallInfo *_info = nullptr) = 0;
+    virtual std::future<CommonAPI::CallStatus> triggerOtaAsync(const std::string &_sha256, const uint64_t &_size, TriggerOtaAsyncCallback _callback = nullptr, const CommonAPI::CallInfo *_info = nullptr) = 0;
+    virtual void updateStatus(std::string _status, std::string _message, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info = nullptr) = 0;
+    virtual std::future<CommonAPI::CallStatus> updateStatusAsync(const std::string &_status, const std::string &_message, UpdateStatusAsyncCallback _callback = nullptr, const CommonAPI::CallInfo *_info = nullptr) = 0;
 
     virtual std::future<void> getCompletionFuture() = 0;
 };

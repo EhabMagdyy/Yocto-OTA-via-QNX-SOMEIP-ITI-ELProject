@@ -16,5 +16,14 @@
         "ttl": "3",
         "cyclic_offer_delay": "2000",
         "request_response_delay": "1500"
-    }
+    },
+    "services": [
+        {
+            "service": "0x1235",
+            "instance": "0x5679",
+            "reliable": {
+                "port": 30500
+            }
+        }
+    ]
 }

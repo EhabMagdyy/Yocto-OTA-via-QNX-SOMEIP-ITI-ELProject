@@ -46,10 +46,6 @@ public:
         OtaSomeIPStubAdapterHelper::deinit();
     }
 
-    void fireOtaAvailableEvent(const std::string &_sha256, const uint64_t &_size);
-
-    void fireOtaStatusEvent(const std::string &_status, const std::string &_message);
-
     void deactivateManagedInstances() {}
     
     CommonAPI::SomeIP::GetAttributeStubDispatcher<
@@ -59,11 +55,19 @@ public:
 
     CommonAPI::SomeIP::MethodWithReplyStubDispatcher<
         ::v1::commonapi::OtaStub,
+        std::tuple< std::string, uint64_t>,
         std::tuple< std::string>,
+        std::tuple< CommonAPI::SomeIP::StringDeployment, CommonAPI::SomeIP::IntegerDeployment<uint64_t>>,
+        std::tuple< CommonAPI::SomeIP::StringDeployment>
+    > triggerOtaStubDispatcher;
+    
+    CommonAPI::SomeIP::MethodWithReplyStubDispatcher<
+        ::v1::commonapi::OtaStub,
+        std::tuple< std::string, std::string>,
         std::tuple< >,
-        std::tuple< CommonAPI::SomeIP::StringDeployment>,
+        std::tuple< CommonAPI::SomeIP::StringDeployment, CommonAPI::SomeIP::StringDeployment>,
         std::tuple< >
-    > confirmReceivedStubDispatcher;
+    > updateStatusStubDispatcher;
     
     OtaSomeIPStubAdapterInternal(
         const CommonAPI::SomeIP::Address &_address,
@@ -75,26 +79,25 @@ public:
             _connection,
             std::dynamic_pointer_cast< OtaStub>(_stub)),
         getOtaInterfaceVersionStubDispatcher(&OtaStub::lockInterfaceVersionAttribute, &OtaStub::getInterfaceVersion, false, true),
-        confirmReceivedStubDispatcher(
-            &OtaStub::confirmReceived,
+        triggerOtaStubDispatcher(
+            &OtaStub::triggerOta,
             false,
             _stub->hasElement(0),
-            std::make_tuple(static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr)),
+            std::make_tuple(static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr), static_cast< CommonAPI::SomeIP::IntegerDeployment<uint64_t>* >(nullptr)),
+            std::make_tuple(static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr)))
+        
+        ,
+        updateStatusStubDispatcher(
+            &OtaStub::updateStatus,
+            false,
+            _stub->hasElement(1),
+            std::make_tuple(static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr), static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr)),
             std::make_tuple())
         
     {
-        OtaSomeIPStubAdapterHelper::addStubDispatcher( { CommonAPI::SomeIP::method_id_t(0x1771) }, &confirmReceivedStubDispatcher );
+        OtaSomeIPStubAdapterHelper::addStubDispatcher( { CommonAPI::SomeIP::method_id_t(0x1771) }, &triggerOtaStubDispatcher );
+        OtaSomeIPStubAdapterHelper::addStubDispatcher( { CommonAPI::SomeIP::method_id_t(0x1772) }, &updateStatusStubDispatcher );
         // Provided events/fields
-        {
-            std::set<CommonAPI::SomeIP::eventgroup_id_t> itsEventGroups;
-            itsEventGroups.insert(CommonAPI::SomeIP::eventgroup_id_t(0x1b5b));
-            CommonAPI::SomeIP::StubAdapter::registerEvent(CommonAPI::SomeIP::event_id_t(0x9477), itsEventGroups, CommonAPI::SomeIP::event_type_e::ET_EVENT, CommonAPI::SomeIP::reliability_type_e::RT_RELIABLE);
-        }
-        {
-            std::set<CommonAPI::SomeIP::eventgroup_id_t> itsEventGroups;
-            itsEventGroups.insert(CommonAPI::SomeIP::eventgroup_id_t(0x1b5b));
-            CommonAPI::SomeIP::StubAdapter::registerEvent(CommonAPI::SomeIP::event_id_t(0x9478), itsEventGroups, CommonAPI::SomeIP::event_type_e::ET_EVENT, CommonAPI::SomeIP::reliability_type_e::RT_RELIABLE);
-        }
     }
 
     // Register/Unregister event handlers for selective broadcasts
@@ -102,38 +105,6 @@ public:
     void unregisterSelectiveEventHandlers();
 
 };
-
-template <typename _Stub, typename... _Stubs>
-void OtaSomeIPStubAdapterInternal<_Stub, _Stubs...>::fireOtaAvailableEvent(const std::string &_sha256, const uint64_t &_size) {
-    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deployed_sha256(_sha256, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
-    CommonAPI::Deployable< uint64_t, CommonAPI::SomeIP::IntegerDeployment<uint64_t>> deployed_size(_size, static_cast< CommonAPI::SomeIP::IntegerDeployment<uint64_t>* >(nullptr));
-    CommonAPI::SomeIP::StubEventHelper<CommonAPI::SomeIP::SerializableArguments<  CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment > 
-    ,  CommonAPI::Deployable< uint64_t, CommonAPI::SomeIP::IntegerDeployment<uint64_t> > 
-    >>
-        ::sendEvent(
-            *this,
-            CommonAPI::SomeIP::event_id_t(0x9477),
-            false,
-             deployed_sha256 
-            ,  deployed_size 
-    );
-}
-
-template <typename _Stub, typename... _Stubs>
-void OtaSomeIPStubAdapterInternal<_Stub, _Stubs...>::fireOtaStatusEvent(const std::string &_status, const std::string &_message) {
-    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deployed_status(_status, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
-    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deployed_message(_message, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
-    CommonAPI::SomeIP::StubEventHelper<CommonAPI::SomeIP::SerializableArguments<  CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment > 
-    ,  CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment > 
-    >>
-        ::sendEvent(
-            *this,
-            CommonAPI::SomeIP::event_id_t(0x9478),
-            false,
-             deployed_status 
-            ,  deployed_message 
-    );
-}
 
 
 template <typename _Stub, typename... _Stubs>

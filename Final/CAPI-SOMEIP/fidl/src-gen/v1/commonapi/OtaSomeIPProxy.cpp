@@ -46,9 +46,7 @@ INITIALIZER(registerOtaSomeIPProxy) {
 OtaSomeIPProxy::OtaSomeIPProxy(
     const CommonAPI::SomeIP::Address &_address,
     const std::shared_ptr<CommonAPI::SomeIP::ProxyConnection> &_connection)
-        : CommonAPI::SomeIP::Proxy(_address, _connection),
-          otaAvailable_(*this, 0x1b5b, CommonAPI::SomeIP::event_id_t(0x9477), CommonAPI::SomeIP::event_type_e::ET_EVENT , CommonAPI::SomeIP::reliability_type_e::RT_RELIABLE, false, std::make_tuple(static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr), static_cast< CommonAPI::SomeIP::IntegerDeployment<uint64_t>* >(nullptr))),
-          otaStatus_(*this, 0x1b5b, CommonAPI::SomeIP::event_id_t(0x9478), CommonAPI::SomeIP::event_type_e::ET_EVENT , CommonAPI::SomeIP::reliability_type_e::RT_RELIABLE, false, std::make_tuple(static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr), static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr)))
+        : CommonAPI::SomeIP::Proxy(_address, _connection)
 {
 }
 
@@ -56,17 +54,84 @@ OtaSomeIPProxy::~OtaSomeIPProxy() {
 }
 
 
-OtaSomeIPProxy::OtaAvailableEvent& OtaSomeIPProxy::getOtaAvailableEvent() {
-    return otaAvailable_;
-}
-OtaSomeIPProxy::OtaStatusEvent& OtaSomeIPProxy::getOtaStatusEvent() {
-    return otaStatus_;
-}
 
-void OtaSomeIPProxy::confirmReceived(std::string _status, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info) {
-    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_status(_status, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
+void OtaSomeIPProxy::triggerOta(std::string _sha256, uint64_t _size, CommonAPI::CallStatus &_internalCallStatus, std::string &_status, const CommonAPI::CallInfo *_info) {
+    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_sha256(_sha256, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
+    CommonAPI::Deployable< uint64_t, CommonAPI::SomeIP::IntegerDeployment<uint64_t>> deploy_size(_size, static_cast< CommonAPI::SomeIP::IntegerDeployment<uint64_t>* >(nullptr));
+    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_status(static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
     CommonAPI::SomeIP::ProxyHelper<
         CommonAPI::SomeIP::SerializableArguments<
+            CommonAPI::Deployable<
+                std::string,
+                CommonAPI::SomeIP::StringDeployment
+            >,
+            CommonAPI::Deployable<
+                uint64_t,
+                CommonAPI::SomeIP::IntegerDeployment<uint64_t>
+            >
+        >,
+        CommonAPI::SomeIP::SerializableArguments<
+            CommonAPI::Deployable<
+                std::string,
+                CommonAPI::SomeIP::StringDeployment
+            >
+        >
+    >::callMethodWithReply(
+        *this,
+        CommonAPI::SomeIP::method_id_t(0x1771),
+        true,
+        false,
+        (_info ? _info : &CommonAPI::SomeIP::defaultCallInfo),
+        deploy_sha256, deploy_size,
+        _internalCallStatus,
+        deploy_status);
+    _status = deploy_status.getValue();
+}
+
+std::future<CommonAPI::CallStatus> OtaSomeIPProxy::triggerOtaAsync(const std::string &_sha256, const uint64_t &_size, TriggerOtaAsyncCallback _callback, const CommonAPI::CallInfo *_info) {
+    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_sha256(_sha256, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
+    CommonAPI::Deployable< uint64_t, CommonAPI::SomeIP::IntegerDeployment<uint64_t>> deploy_size(_size, static_cast< CommonAPI::SomeIP::IntegerDeployment<uint64_t>* >(nullptr));
+    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_status(static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
+    return CommonAPI::SomeIP::ProxyHelper<
+        CommonAPI::SomeIP::SerializableArguments<
+            CommonAPI::Deployable<
+                std::string,
+                CommonAPI::SomeIP::StringDeployment
+            >,
+            CommonAPI::Deployable<
+                uint64_t,
+                CommonAPI::SomeIP::IntegerDeployment<uint64_t>
+            >
+        >,
+        CommonAPI::SomeIP::SerializableArguments<
+            CommonAPI::Deployable<
+                std::string,
+                CommonAPI::SomeIP::StringDeployment
+            >
+        >
+    >::callMethodAsync(
+        *this,
+        CommonAPI::SomeIP::method_id_t(0x1771),
+        true,
+        false,
+        (_info ? _info : &CommonAPI::SomeIP::defaultCallInfo),
+        deploy_sha256, deploy_size,
+        [_callback] (CommonAPI::CallStatus _internalCallStatus, CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment > _status) {
+            if (_callback)
+                _callback(_internalCallStatus, _status.getValue());
+        },
+        std::make_tuple(deploy_status));
+}
+
+void OtaSomeIPProxy::updateStatus(std::string _status, std::string _message, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info) {
+    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_status(_status, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
+    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_message(_message, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
+    CommonAPI::SomeIP::ProxyHelper<
+        CommonAPI::SomeIP::SerializableArguments<
+            CommonAPI::Deployable<
+                std::string,
+                CommonAPI::SomeIP::StringDeployment
+            >,
             CommonAPI::Deployable<
                 std::string,
                 CommonAPI::SomeIP::StringDeployment
@@ -76,18 +141,23 @@ void OtaSomeIPProxy::confirmReceived(std::string _status, CommonAPI::CallStatus 
         >
     >::callMethodWithReply(
         *this,
-        CommonAPI::SomeIP::method_id_t(0x1771),
+        CommonAPI::SomeIP::method_id_t(0x1772),
         true,
         false,
         (_info ? _info : &CommonAPI::SomeIP::defaultCallInfo),
-        deploy_status,
+        deploy_status, deploy_message,
         _internalCallStatus);
 }
 
-std::future<CommonAPI::CallStatus> OtaSomeIPProxy::confirmReceivedAsync(const std::string &_status, ConfirmReceivedAsyncCallback _callback, const CommonAPI::CallInfo *_info) {
+std::future<CommonAPI::CallStatus> OtaSomeIPProxy::updateStatusAsync(const std::string &_status, const std::string &_message, UpdateStatusAsyncCallback _callback, const CommonAPI::CallInfo *_info) {
     CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_status(_status, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
+    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_message(_message, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
     return CommonAPI::SomeIP::ProxyHelper<
         CommonAPI::SomeIP::SerializableArguments<
+            CommonAPI::Deployable<
+                std::string,
+                CommonAPI::SomeIP::StringDeployment
+            >,
             CommonAPI::Deployable<
                 std::string,
                 CommonAPI::SomeIP::StringDeployment
@@ -97,11 +167,11 @@ std::future<CommonAPI::CallStatus> OtaSomeIPProxy::confirmReceivedAsync(const st
         >
     >::callMethodAsync(
         *this,
-        CommonAPI::SomeIP::method_id_t(0x1771),
+        CommonAPI::SomeIP::method_id_t(0x1772),
         true,
         false,
         (_info ? _info : &CommonAPI::SomeIP::defaultCallInfo),
-        deploy_status,
+        deploy_status, deploy_message,
         [_callback] (CommonAPI::CallStatus _internalCallStatus) {
             if (_callback)
                 _callback(_internalCallStatus);

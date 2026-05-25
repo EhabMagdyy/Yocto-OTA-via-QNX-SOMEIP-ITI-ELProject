@@ -2,15 +2,8 @@
     "unicast": "192.168.50.100",
     "netmask": "255.255.255.0",
     "logging": { "level": "info", "console": true },
-    "applications": [{ "name": "qnxService", "id": "0x1235" }],
+    "applications": [{ "name": "qnxService", "id": "0x1236" }],
     "routing": "qnxService",
-    "services": [
-        {
-            "service": "0x1234",
-            "instance": "0x5678",
-            "reliable": { "port": 30490 }
-        }
-    ],
     "service-discovery": {
         "enable": true,
         "multicast": "224.224.224.245",

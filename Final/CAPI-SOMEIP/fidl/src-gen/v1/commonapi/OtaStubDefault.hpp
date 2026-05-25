@@ -60,16 +60,18 @@ public:
         return &remoteEventHandler_;
     }
 
-    COMMONAPI_EXPORT virtual void confirmReceived(const std::shared_ptr<CommonAPI::ClientId> _client, std::string _status, confirmReceivedReply_t _reply) {
+    COMMONAPI_EXPORT virtual void triggerOta(const std::shared_ptr<CommonAPI::ClientId> _client, std::string _sha256, uint64_t _size, triggerOtaReply_t _reply) {
+        (void)_client;
+        (void)_sha256;
+        (void)_size;
+        std::string status = "";
+        _reply(status);
+    }
+    COMMONAPI_EXPORT virtual void updateStatus(const std::shared_ptr<CommonAPI::ClientId> _client, std::string _status, std::string _message, updateStatusReply_t _reply) {
         (void)_client;
         (void)_status;
+        (void)_message;
         _reply();
-    }
-    COMMONAPI_EXPORT virtual void fireOtaAvailableEvent(const std::string &_sha256, const uint64_t &_size) {
-        OtaStub::fireOtaAvailableEvent(_sha256, _size);
-    }
-    COMMONAPI_EXPORT virtual void fireOtaStatusEvent(const std::string &_status, const std::string &_message) {
-        OtaStub::fireOtaStatusEvent(_status, _message);
     }
 
 

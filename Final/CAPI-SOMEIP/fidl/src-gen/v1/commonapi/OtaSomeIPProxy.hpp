@@ -20,7 +20,6 @@
 #include <CommonAPI/SomeIP/Factory.hpp>
 #include <CommonAPI/SomeIP/Proxy.hpp>
 #include <CommonAPI/SomeIP/Types.hpp>
-#include <CommonAPI/SomeIP/Event.hpp>
 
 #if defined (HAS_DEFINED_COMMONAPI_INTERNAL_COMPILATION_HERE)
 #undef COMMONAPI_INTERNAL_COMPILATION
@@ -54,21 +53,19 @@ public:
 
     virtual ~OtaSomeIPProxy();
 
-    virtual OtaAvailableEvent& getOtaAvailableEvent();
+    virtual void triggerOta(std::string _sha256, uint64_t _size, CommonAPI::CallStatus &_internalCallStatus, std::string &_status, const CommonAPI::CallInfo *_info);
 
-    virtual OtaStatusEvent& getOtaStatusEvent();
+    virtual std::future<CommonAPI::CallStatus> triggerOtaAsync(const std::string &_sha256, const uint64_t &_size, TriggerOtaAsyncCallback _callback, const CommonAPI::CallInfo *_info);
 
-    virtual void confirmReceived(std::string _status, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info);
+    virtual void updateStatus(std::string _status, std::string _message, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info);
 
-    virtual std::future<CommonAPI::CallStatus> confirmReceivedAsync(const std::string &_status, ConfirmReceivedAsyncCallback _callback, const CommonAPI::CallInfo *_info);
+    virtual std::future<CommonAPI::CallStatus> updateStatusAsync(const std::string &_status, const std::string &_message, UpdateStatusAsyncCallback _callback, const CommonAPI::CallInfo *_info);
 
     virtual void getOwnVersion(uint16_t &_major, uint16_t &_minor) const;
 
     virtual std::future<void> getCompletionFuture();
 
 private:
-    CommonAPI::SomeIP::Event<OtaAvailableEvent, CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment >, CommonAPI::Deployable< uint64_t, CommonAPI::SomeIP::IntegerDeployment<uint64_t> >> otaAvailable_;
-    CommonAPI::SomeIP::Event<OtaStatusEvent, CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment >, CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment >> otaStatus_;
 
 };
 

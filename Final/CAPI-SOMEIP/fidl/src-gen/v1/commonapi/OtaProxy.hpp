@@ -69,16 +69,17 @@ public:
     virtual std::future<void> getCompletionFuture();
 
     /**
-     * Calls confirmReceived with synchronous semantics.
+     * Calls triggerOta with synchronous semantics.
      *
      * All const parameters are input parameters to this method.
+     * All non-const parameters will be filled with the returned values.
      * The CallStatus will be filled when the method returns and indicate either
      * "SUCCESS" or which type of error has occurred. In case of an error, ONLY the CallStatus
      * will be set.
      */
-    virtual void confirmReceived(std::string _status, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info = nullptr);
+    virtual void triggerOta(std::string _sha256, uint64_t _size, CommonAPI::CallStatus &_internalCallStatus, std::string &_status, const CommonAPI::CallInfo *_info = nullptr);
     /**
-     * Calls confirmReceived with asynchronous semantics.
+     * Calls triggerOta with asynchronous semantics.
      *
      * The provided callback will be called when the reply to this call arrives or
      * an error occurs during the call. The CallStatus will indicate either "SUCCESS"
@@ -87,19 +88,27 @@ public:
      * The std::future returned by this method will be fulfilled at arrival of the reply.
      * It will provide the same value for CallStatus as will be handed to the callback.
      */
-    virtual std::future<CommonAPI::CallStatus> confirmReceivedAsync(const std::string &_status, ConfirmReceivedAsyncCallback _callback = nullptr, const CommonAPI::CallInfo *_info = nullptr);
+    virtual std::future<CommonAPI::CallStatus> triggerOtaAsync(const std::string &_sha256, const uint64_t &_size, TriggerOtaAsyncCallback _callback = nullptr, const CommonAPI::CallInfo *_info = nullptr);
     /**
-     * Returns the wrapper class that provides access to the broadcast otaAvailable.
+     * Calls updateStatus with synchronous semantics.
+     *
+     * All const parameters are input parameters to this method.
+     * The CallStatus will be filled when the method returns and indicate either
+     * "SUCCESS" or which type of error has occurred. In case of an error, ONLY the CallStatus
+     * will be set.
      */
-    virtual OtaAvailableEvent& getOtaAvailableEvent() {
-        return delegate_->getOtaAvailableEvent();
-    }
+    virtual void updateStatus(std::string _status, std::string _message, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info = nullptr);
     /**
-     * Returns the wrapper class that provides access to the broadcast otaStatus.
+     * Calls updateStatus with asynchronous semantics.
+     *
+     * The provided callback will be called when the reply to this call arrives or
+     * an error occurs during the call. The CallStatus will indicate either "SUCCESS"
+     * or which type of error has occurred. In case of any error, ONLY the CallStatus
+     * will have a defined value.
+     * The std::future returned by this method will be fulfilled at arrival of the reply.
+     * It will provide the same value for CallStatus as will be handed to the callback.
      */
-    virtual OtaStatusEvent& getOtaStatusEvent() {
-        return delegate_->getOtaStatusEvent();
-    }
+    virtual std::future<CommonAPI::CallStatus> updateStatusAsync(const std::string &_status, const std::string &_message, UpdateStatusAsyncCallback _callback = nullptr, const CommonAPI::CallInfo *_info = nullptr);
 
 
 
@@ -124,13 +133,22 @@ OtaProxy<_AttributeExtensions...>::~OtaProxy() {
 }
 
 template <typename ... _AttributeExtensions>
-void OtaProxy<_AttributeExtensions...>::confirmReceived(std::string _status, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info) {
-    delegate_->confirmReceived(_status, _internalCallStatus, _info);
+void OtaProxy<_AttributeExtensions...>::triggerOta(std::string _sha256, uint64_t _size, CommonAPI::CallStatus &_internalCallStatus, std::string &_status, const CommonAPI::CallInfo *_info) {
+    delegate_->triggerOta(_sha256, _size, _internalCallStatus, _status, _info);
 }
 
 template <typename ... _AttributeExtensions>
-std::future<CommonAPI::CallStatus> OtaProxy<_AttributeExtensions...>::confirmReceivedAsync(const std::string &_status, ConfirmReceivedAsyncCallback _callback, const CommonAPI::CallInfo *_info) {
-    return delegate_->confirmReceivedAsync(_status, _callback, _info);
+std::future<CommonAPI::CallStatus> OtaProxy<_AttributeExtensions...>::triggerOtaAsync(const std::string &_sha256, const uint64_t &_size, TriggerOtaAsyncCallback _callback, const CommonAPI::CallInfo *_info) {
+    return delegate_->triggerOtaAsync(_sha256, _size, _callback, _info);
+}
+template <typename ... _AttributeExtensions>
+void OtaProxy<_AttributeExtensions...>::updateStatus(std::string _status, std::string _message, CommonAPI::CallStatus &_internalCallStatus, const CommonAPI::CallInfo *_info) {
+    delegate_->updateStatus(_status, _message, _internalCallStatus, _info);
+}
+
+template <typename ... _AttributeExtensions>
+std::future<CommonAPI::CallStatus> OtaProxy<_AttributeExtensions...>::updateStatusAsync(const std::string &_status, const std::string &_message, UpdateStatusAsyncCallback _callback, const CommonAPI::CallInfo *_info) {
+    return delegate_->updateStatusAsync(_status, _message, _callback, _info);
 }
 
 template <typename ... _AttributeExtensions>
