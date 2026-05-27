@@ -9,6 +9,7 @@
 - [System Overview](#system-overview)
 - [Architecture Diagram](#architecture-diagram)
 - [Hardware Requirements](#hardware-requirements)
+- [Yocto Image Partition Layout](#yocto-image-partition-layout)
 - [Network Topology](#network-topology)
 - [Phase 1 — Host: Launch the Dashboard](#phase-1--host-launch-the-dashboard)
 - [Phase 2 — Host: Send OTA Package](#phase-2--host-send-ota-package)
@@ -134,9 +135,7 @@ The host operator uses a Qt/QML **Dashboard GUI** to select a built rootfs image
 
 ---
 
-## Yocto image partitions
-
-## SD Card Partition Layout — Yocto RPi3
+## Yocto Image Partition Layout
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -166,9 +165,9 @@ The host operator uses a Qt/QML **Dashboard GUI** to select a built rootfs image
         │ SSH/SCP (any IP)
         │
    ┌────┴────────────────────────────────┐
-   │ QNX RPi4 ── Ethernet ── Yocto RPi3 │
+   │ QNX RPi4 ── Ethernet ── Yocto RPi3  │
    │ 192.168.50.100       192.168.50.50  │
-   └────────────────────────────────────┘
+   └─────────────────────────────────────┘
         Static IPs on dedicated eth0 link
         UDP multicast SD: 224.224.224.245:30490
         TCP data: 192.168.50.50:30500
