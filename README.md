@@ -41,26 +41,26 @@ The host operator uses a Qt/QML **Dashboard GUI** to select a built rootfs image
 ## Architecture Diagram
 
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│                        HOST (Dev Machine)                          │
-│                                                                    │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │              Qt/QML OTA Dashboard (appDashboard)             │  │
-│  │                                                              │  │
-│  │  [Browse .ext4]  [QNX IP Field]  [Send OTA]  [Cancel]       │  │
-│  │         │               │             │                      │  │
-│  │         └───────────────┴─────────────┘                     │  │
-│  │                         │                                    │  │
-│  │               spawns send-ota.sh                             │  │
-│  └─────────────────────────┼────────────────────────────────────┘  │
-│                            │                                       │
-│         send-ota.sh:       │                                       │
-│         1. uuidgen         │                                       │
-│         2. sha256sum       │                                       │
-│         3. write manifest  │                                       │
-│         4. scp manifest ───┼──────────────────────────────────────►│
-│         5. pv | ssh ───────┼──────────────────────── image ───────►│
-│         6. ssh validate ───┼──────────────────────── trigger ─────►│
+┌─────────────────────────────────────────────────────────────────────┐
+│                        HOST (Dev Machine)                           │
+│                                                                     │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │              Qt/QML OTA Dashboard (appDashboard)             │   │
+│  │                                                              │   │
+│  │  [Browse .ext4]  [QNX IP Field]  [Send OTA]  [Cancel]        │   │
+│  │         │               │             │                      │   │
+│  │         └───────────────┴─────────────┘                      │   │
+│  │                         │                                    │   │
+│  │               spawns send-ota.sh                             │   │
+│  └─────────────────────────┼────────────────────────────────────┘   │
+│                            │                                        │
+│         send-ota.sh:       │                                        │
+│         1. uuidgen         │                                        │
+│         2. sha256sum       │                                        │
+│         3. write manifest  │                                        │
+│         4. scp manifest ───┼──────────────────────────────────────► │
+│         5. pv | ssh ───────┼──────────────────────── image ───────► │
+│         6. ssh validate ───┼──────────────────────── trigger ─────► │
 └────────────────────────────┼────────────────────────────────────────┘
                              │  SSH / SCP  (Ethernet)
                              ▼
@@ -80,19 +80,19 @@ The host operator uses a Qt/QML **Dashboard GUI** to select a built rootfs image
 │                      ▼ (all checks pass)                           │
 │             runQnx.sh  →  qnxService (CommonAPI SOME/IP Client)    │
 │                      │                                             │
-│      ┌───────────────┴───────────────────────────────┐            │
-│      │  SOME/IP over Ethernet (UDP SD + TCP data)    │            │
-│      │                                               │            │
-│      │  triggerOta(sha256, size)  ──────────────────►│            │
-│      │  ◄─────────────────────── "accepted"          │            │
-│      │                                               │            │
-│      │  updateStatus("scp_started", ...)  ──────────►│            │
-│      │  updateStatus("scp_done",    ...)  ──────────►│            │
-│      │  updateStatus("flashing",    ...)  ──────────►│            │
-│      └───────────────────────────────────────────────┘            │
+│      ┌───────────────┴───────────────────────────────┐             │
+│      │  SOME/IP over Ethernet (UDP SD + TCP data)    │             │
+│      │                                               │             │
+│      │  triggerOta(sha256, size)  ──────────────────►│             │
+│      │  ◄─────────────────────── "accepted"          │             │
+│      │                                               │             │
+│      │  updateStatus("scp_started", ...)  ──────────►│             │
+│      │  updateStatus("scp_done",    ...)  ──────────►│             │
+│      │  updateStatus("flashing",    ...)  ──────────►│             │
+│      └───────────────────────────────────────────────┘             │
 │                      │                                             │
-│     SCP image ───────┼──────────────────────────────────────────► │
-│     SSH ota.sh ──────┼──────────────────────────────────────────► │
+│     SCP image ───────┼──────────────────────────────────────────►  │
+│     SSH ota.sh ──────┼──────────────────────────────────────────►  │
 └──────────────────────┼─────────────────────────────────────────────┘
                        │  SCP + SSH  (Ethernet)
                        ▼
@@ -129,8 +129,32 @@ The host operator uses a Qt/QML **Dashboard GUI** to select a built rootfs image
 - Raspberry Pi 4B running **QNX 8.0** (gateway/validator)
 - Raspberry Pi 3B+ running **Yocto Linux** (target ECU)
 - Development PC running **Ubuntu Linux** (host)
-- Ethernet connection between all three machines
+- Ethernet connection between the two RPis devices
 - SD card on RPi3 with A/B partitioned layout (see [A/B Slot Layout](#ab-slot-layout))
+
+---
+
+## Yocto image partitions
+
+## SD Card Partition Layout — Yocto RPi3
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        mmcblk0 — SD Card                                    │
+│                                                                             │
+│  ┌──────────────┬───────────────────┬───────────────────┬─────────────────┐ │
+│  │    boot      │    rootfs_a       │    rootfs_b       │    staging      │ │
+│  │  mmcblk0p1   │   mmcblk0p2       │   mmcblk0p3       │   mmcblk0p4     │ │
+│  │   FAT32      │   ext4 · Slot A   │   ext4 · Slot B   │  ext4 · OTA tmp │ │
+│  │              │                   │                   │                 │ │
+│  │  U-Boot env  │                   │                   │  QNX SCPs image │ │
+│  │  kernel, dtb │                   │                   │  here first     │ │
+│  └──────────────┴───────────────────┴───────────────────┴─────────────────┘ │
+│                             ▲                                               │
+│                       active_slot = a                                       │
+│                       (U-Boot env)                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -181,21 +205,21 @@ cd Dashboard/build
 The Dashboard opens on `1000×720`. Select your rootfs `.ext4` image using **Browse Files**, enter the QNX IP, then press **Send OTA**.
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  ↑ OTA Updater          New Rootfs Deployment Tool      ● Idle      │
+┌────────────────────────────────────────────────────────────────────┐
+│  ↑ OTA Updater          New Rootfs Deployment Tool      ● Idle     │
 ├──────────────────┬──────────────────────────┬──────────────────────┤
 │  Target Device   │  Firmware Image          │  Actions             │
 │  ─────────────   │  ─────────────────────   │  ─────────────────   │
 │  QNX IP:         │  💾 core-image.ext4      │  [Send OTA] [Cancel] │
 │  192.168.1.15    │  [Browse Files]          │                      │
 ├──────────────────┴──────────────────────────┴──────────────────────┤
-│  Deployment Console                                      ● IDLE     │
-│  ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄   │
-│  Logs will appear here...                                           │
-├─────────────────────────────────────────────────────────────────────┤
-│  Transfer Progress                                           —      │
+│  Deployment Console                                      ● IDLE    │
+│  ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄      │  
+│  Logs will appear here...                                          │
+├────────────────────────────────────────────────────────────────────┤
+│  Transfer Progress                                           —     │
 │  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                        │
-└─────────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -310,13 +334,13 @@ QNX qnxService                          Yocto yoctoService
 
 ### vsomeip configuration
 
-| Parameter | QNX (client) | Yocto (server) |
-|-----------|-------------|----------------|
-| Unicast IP | `192.168.50.100` | `192.168.50.50` |
-| SD multicast | `224.224.224.245:30490` | `224.224.224.245:30490` |
-| TCP data port | — | `30500` |
-| Service ID | `0x1235` | `0x1235` |
-| Instance | `0x5679` | `0x5679` |
+| Parameter        | QNX (client)            | Yocto (server)          |
+|------------------|-------------------------|-------------------------|
+| Unicast IP       | `192.168.50.100`        | `192.168.50.50`         |
+| SD multicast     | `224.224.224.245:30490` | `224.224.224.245:30490` |
+| TCP data port    |           —             | `30500`                 |
+| Service ID       | `0x1235`                | `0x1235`                |
+| Instance         | `0x5679`                | `0x5679`                |
 
 ---
 
