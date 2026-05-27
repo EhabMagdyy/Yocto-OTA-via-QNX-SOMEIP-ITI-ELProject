@@ -73,6 +73,9 @@ public:
         (void)_message;
         _reply();
     }
+    COMMONAPI_EXPORT virtual void fireOtaExecutionStatusEvent(const std::string &_status, const std::string &_message) {
+        OtaStub::fireOtaExecutionStatusEvent(_status, _message);
+    }
 
 
 protected:

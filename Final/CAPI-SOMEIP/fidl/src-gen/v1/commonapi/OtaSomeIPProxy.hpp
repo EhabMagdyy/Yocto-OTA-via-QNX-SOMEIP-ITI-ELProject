@@ -20,6 +20,7 @@
 #include <CommonAPI/SomeIP/Factory.hpp>
 #include <CommonAPI/SomeIP/Proxy.hpp>
 #include <CommonAPI/SomeIP/Types.hpp>
+#include <CommonAPI/SomeIP/Event.hpp>
 
 #if defined (HAS_DEFINED_COMMONAPI_INTERNAL_COMPILATION_HERE)
 #undef COMMONAPI_INTERNAL_COMPILATION
@@ -53,6 +54,8 @@ public:
 
     virtual ~OtaSomeIPProxy();
 
+    virtual OtaExecutionStatusEvent& getOtaExecutionStatusEvent();
+
     virtual void triggerOta(std::string _sha256, uint64_t _size, CommonAPI::CallStatus &_internalCallStatus, std::string &_status, const CommonAPI::CallInfo *_info);
 
     virtual std::future<CommonAPI::CallStatus> triggerOtaAsync(const std::string &_sha256, const uint64_t &_size, TriggerOtaAsyncCallback _callback, const CommonAPI::CallInfo *_info);
@@ -66,6 +69,7 @@ public:
     virtual std::future<void> getCompletionFuture();
 
 private:
+    CommonAPI::SomeIP::Event<OtaExecutionStatusEvent, CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment >, CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment >> otaExecutionStatus_;
 
 };
 

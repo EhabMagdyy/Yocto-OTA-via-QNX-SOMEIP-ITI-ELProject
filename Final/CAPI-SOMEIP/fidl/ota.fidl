@@ -3,7 +3,7 @@ package commonapi
 interface Ota {
     version { major 1 minor 0 }
 
-    // QNX (Client) calls this to tell Yocto (Server) the OTA is ready.
+    // QNX (Client) calls this to tell Yocto (Server) the OTA is ready
     method triggerOta {
         in {
             String sha256
@@ -14,9 +14,18 @@ interface Ota {
         }
     }
 
-    // QNX (Client) calls this to push status updates to Yocto.
+    // QNX (Client) calls this to push status updates to Yocto, which helps yocto to track the progress and set busy state
+    // or if failed it prepares itself for new fresh ota package
     method updateStatus {
         in {
+            String status
+            String message
+        }
+    }
+
+    // Broadcast fired by Yocto to notify QNX right before reboot (to let the Host see the status)
+    broadcast otaExecutionStatus {
+        out {
             String status
             String message
         }

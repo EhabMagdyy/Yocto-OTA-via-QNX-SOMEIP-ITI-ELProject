@@ -46,6 +46,8 @@ public:
         OtaSomeIPStubAdapterHelper::deinit();
     }
 
+    void fireOtaExecutionStatusEvent(const std::string &_status, const std::string &_message);
+
     void deactivateManagedInstances() {}
     
     CommonAPI::SomeIP::GetAttributeStubDispatcher<
@@ -98,6 +100,11 @@ public:
         OtaSomeIPStubAdapterHelper::addStubDispatcher( { CommonAPI::SomeIP::method_id_t(0x1771) }, &triggerOtaStubDispatcher );
         OtaSomeIPStubAdapterHelper::addStubDispatcher( { CommonAPI::SomeIP::method_id_t(0x1772) }, &updateStatusStubDispatcher );
         // Provided events/fields
+        {
+            std::set<CommonAPI::SomeIP::eventgroup_id_t> itsEventGroups;
+            itsEventGroups.insert(CommonAPI::SomeIP::eventgroup_id_t(0x1b5b));
+            CommonAPI::SomeIP::StubAdapter::registerEvent(CommonAPI::SomeIP::event_id_t(0x947a), itsEventGroups, CommonAPI::SomeIP::event_type_e::ET_EVENT, CommonAPI::SomeIP::reliability_type_e::RT_RELIABLE);
+        }
     }
 
     // Register/Unregister event handlers for selective broadcasts
@@ -105,6 +112,22 @@ public:
     void unregisterSelectiveEventHandlers();
 
 };
+
+template <typename _Stub, typename... _Stubs>
+void OtaSomeIPStubAdapterInternal<_Stub, _Stubs...>::fireOtaExecutionStatusEvent(const std::string &_status, const std::string &_message) {
+    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deployed_status(_status, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
+    CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deployed_message(_message, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));
+    CommonAPI::SomeIP::StubEventHelper<CommonAPI::SomeIP::SerializableArguments<  CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment > 
+    ,  CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment > 
+    >>
+        ::sendEvent(
+            *this,
+            CommonAPI::SomeIP::event_id_t(0x947a),
+            false,
+             deployed_status 
+            ,  deployed_message 
+    );
+}
 
 
 template <typename _Stub, typename... _Stubs>

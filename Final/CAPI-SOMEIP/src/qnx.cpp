@@ -9,17 +9,19 @@
 using namespace v1::commonapi;
 
 static std::atomic<bool> running(true);
-static void signalHandler(int) { running = false; }
+static void signalHandler(int){ running = false; }
 
 std::shared_ptr<OtaProxy<>> myProxy;
 
-void sendStatus(std::string status, std::string message) {
-    if(!myProxy) return;
+void sendStatus(std::string status, std::string message){
+    if(!myProxy)
+        return;
+        
     CommonAPI::CallStatus cs;
     myProxy->updateStatus(status, message, cs);
 }
 
-void doTransfer(std::string sha256, uint64_t size) {
+void doTransfer(std::string sha256, uint64_t size){
     const std::string RPI3_IP      = "192.168.50.50";
     const std::string REMOTE_STAGE = "/mnt/staging/ota_image.ext4";
     const std::string LOCAL_IMAGE  = "/tmp/ota_image.ext4";
@@ -49,14 +51,14 @@ void doTransfer(std::string sha256, uint64_t size) {
     std::cout << "[QNX] " << otaCmd << std::endl;
     ret = std::system(otaCmd.c_str());
 
-    if(ret == 0) {
+    if(ret == 0){
         sendStatus("flashing", "ota.sh started on RPi3");
     } else {
         sendStatus("error", "failed to trigger ota.sh");
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]){
     std::signal(SIGINT,  signalHandler);
     std::signal(SIGTERM, signalHandler);
 
@@ -73,32 +75,51 @@ int main(int argc, char* argv[]) {
 
     std::cout << "[QNX] Client started. Waiting for RPi3 OTA server..." << std::endl;
 
-    while (!myProxy->isAvailable() && running) {
+    while(!myProxy->isAvailable() && running){
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
-    if (!running) return 0;
+    std::cout << "[QNX] Connected to RPi3 Server! Subscribing to execution status broadcasts..." << std::endl;
+
+    myProxy->getOtaExecutionStatusEvent().subscribe([](const std::string& status, const std::string& message){
+        std::cout << "\n[QNX RECEIVED BROADCAST EVENT]" << std::endl;
+        std::cout << " -> Status:  [" << status << "]" << std::endl;
+        std::cout << " -> Message: " << message << std::endl;
+        
+        if(status == "success"){
+            std::cout << "======================================================================" << std::endl;
+            std::cout << "[QNX] Process complete! RPi3 is successfully flashing and rebooting." << std::endl;
+            std::cout << "======================================================================" << std::endl;
+        } else if(status == "failed"){
+            std::cout << "==========================================================================" << std::endl;
+            std::cerr << "[QNX] Warning: Update script execution dropped an internal failure signal." << std::endl;
+            std::cout << "==========================================================================" << std::endl;
+        }
+    });
+
+    if(!running) return 0;
     std::cout << "[QNX] RPi3 Server found! Requesting OTA transfer..." << std::endl;
 
     CommonAPI::CallStatus cs;
     std::string status;
     myProxy->triggerOta(sha256, size, cs, status);
 
-    if (cs != CommonAPI::CallStatus::SUCCESS) {
+    if(cs != CommonAPI::CallStatus::SUCCESS){
         std::cerr << "[QNX] Method call failed" << std::endl;
         return 1;
     }
 
     std::cout << "[QNX] RPi3 response: " << status << std::endl;
 
-    if(status == "accepted") {
-        std::thread([sha256, size]() { doTransfer(sha256, size); }).detach();
-    } else {
+    if(status == "accepted"){
+        std::thread([sha256, size](){ doTransfer(sha256, size); }).detach();
+    }
+    else {
         std::cout << "[QNX] RPi3 rejected — OTA aborted" << std::endl;
         sendStatus("error", "RPi3 rejected the update");
     }
 
-    while(running) {
+    while(running){
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 

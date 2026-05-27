@@ -22,7 +22,7 @@ cd ..
 # Source QNX SDP environment
 source ~/qnx800/qnxsdp-env.sh
 
-# Build with QNX toolchain
+# Build with QNX toolchain (Comment out the QNX Section in CMakeLists & Comment the Yocto Section)
 cmake -B build-qnx -DCMAKE_TOOLCHAIN_FILE=/home/ehab/qnxCTI/src/qnx_aarch64_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -S .
 cmake --build build-qnx -j$(nproc)
 ```
@@ -35,6 +35,7 @@ cmake --build build-qnx -j$(nproc)
 rm -r build-yocto
 mkdir build-yocto && cd build-yocto
 
+# Comment out the Yocto Section in CMakeLists & Comment the QNX Section
 cmake \
     -DCMAKE_TOOLCHAIN_FILE=~/rpi-toolchain.cmake \
     -DCommonAPI_DIR=~/rpi-sysroot/usr/lib/cmake/CommonAPI-3.2.4 \
@@ -81,13 +82,9 @@ scp runYocto.sh                  root@192.168.1.100:/capi-ota/
 ```
 
 > vsomeip service discovery uses UDP multicast. Add the route once per boot:
-
-```bash
-# Check interface name
-ip link show
-
-# Add route (replace eth0 with your actual interface if different)
-ip route add 224.0.0.0/4 dev eth0
+```sh
+# note, its added in a startup service:
+route add -net 224.0.0.0 netmask 240.0.0.0 dev eth0
 ```
 
 ---
@@ -113,12 +110,5 @@ ping 192.168.50.50
 ### QNX
 ```sh
 route add -net 224.0.0.0 -netmask 240.0.0.0 192.168.50.100
-
-```
-
-### Yocto
-```sh
-route add -net 224.0.0.0 netmask 240.0.0.0 dev eth0
-
 
 ```

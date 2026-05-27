@@ -1,8 +1,16 @@
 {
     "unicast": "192.168.50.50",
     "netmask": "255.255.255.0",
-    "logging": { "level": "info", "console": true },
-    "applications": [{ "name": "yoctoService", "id": "0x1234" }],
+    "logging": { 
+        "level": "info",
+        "console": true 
+    },
+    "applications": [
+        { 
+            "name": "yoctoService", 
+            "id": "0x1234" 
+        }
+    ],
     "routing": "yoctoService",
     "service-discovery": {
         "enable": true,

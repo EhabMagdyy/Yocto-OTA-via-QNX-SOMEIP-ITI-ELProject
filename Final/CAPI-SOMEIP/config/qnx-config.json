@@ -1,8 +1,16 @@
 {
     "unicast": "192.168.50.100",
     "netmask": "255.255.255.0",
-    "logging": { "level": "info", "console": true },
-    "applications": [{ "name": "qnxService", "id": "0x1236" }],
+    "logging": { 
+        "level": "info", 
+        "console": true 
+    },
+    "applications": [
+        { 
+            "name": "qnxService", 
+            "id": "0x1236" 
+        }
+    ],
     "routing": "qnxService",
     "service-discovery": {
         "enable": true,

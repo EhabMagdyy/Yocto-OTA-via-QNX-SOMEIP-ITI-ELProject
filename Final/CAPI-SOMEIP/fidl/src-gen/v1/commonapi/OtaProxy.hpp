@@ -109,6 +109,12 @@ public:
      * It will provide the same value for CallStatus as will be handed to the callback.
      */
     virtual std::future<CommonAPI::CallStatus> updateStatusAsync(const std::string &_status, const std::string &_message, UpdateStatusAsyncCallback _callback = nullptr, const CommonAPI::CallInfo *_info = nullptr);
+    /**
+     * Returns the wrapper class that provides access to the broadcast otaExecutionStatus.
+     */
+    virtual OtaExecutionStatusEvent& getOtaExecutionStatusEvent() {
+        return delegate_->getOtaExecutionStatusEvent();
+    }
 
 
 

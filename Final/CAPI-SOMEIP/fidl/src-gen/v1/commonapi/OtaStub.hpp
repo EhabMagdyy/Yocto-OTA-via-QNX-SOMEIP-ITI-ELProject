@@ -23,6 +23,7 @@
 #define HAS_DEFINED_COMMONAPI_INTERNAL_COMPILATION_HERE
 #endif
 
+#include <unordered_set>
 #include <vector>
 
 
@@ -46,6 +47,11 @@ class OtaStubAdapter
     : public virtual CommonAPI::StubAdapter,
       public virtual Ota {
  public:
+    /**
+    * Sends a broadcast event for otaExecutionStatus. Should not be called directly.
+    * Instead, the "fire<broadcastName>Event" methods of the stub should be used.
+    */
+    virtual void fireOtaExecutionStatusEvent(const std::string &_status, const std::string &_message) = 0;
 
 
     virtual void deactivateManagedInstances() = 0;
@@ -94,7 +100,7 @@ public:
     virtual ~OtaStub() {}
     void lockInterfaceVersionAttribute(bool _lockAccess) { static_cast<void>(_lockAccess); }
     bool hasElement(const uint32_t _id) const {
-        return (_id < 2);
+        return (_id < 3);
     }
     virtual const CommonAPI::Version& getInterfaceVersion(std::shared_ptr<CommonAPI::ClientId> _client) = 0;
 
@@ -102,6 +108,12 @@ public:
     virtual void triggerOta(const std::shared_ptr<CommonAPI::ClientId> _client, std::string _sha256, uint64_t _size, triggerOtaReply_t _reply) = 0;
     /// This is the method that will be called on remote calls on the method updateStatus.
     virtual void updateStatus(const std::shared_ptr<CommonAPI::ClientId> _client, std::string _status, std::string _message, updateStatusReply_t _reply) = 0;
+    /// Sends a broadcast event for otaExecutionStatus.
+    virtual void fireOtaExecutionStatusEvent(const std::string &_status, const std::string &_message) {
+        auto stubAdapter = CommonAPI::Stub<OtaStubAdapter, OtaStubRemoteEvent>::stubAdapter_.lock();
+        if (stubAdapter)
+            stubAdapter->fireOtaExecutionStatusEvent(_status, _message);
+    }
 
 
     using CommonAPI::Stub<OtaStubAdapter, OtaStubRemoteEvent>::initStubAdapter;

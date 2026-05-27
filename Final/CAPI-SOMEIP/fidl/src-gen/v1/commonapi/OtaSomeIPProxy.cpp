@@ -46,7 +46,8 @@ INITIALIZER(registerOtaSomeIPProxy) {
 OtaSomeIPProxy::OtaSomeIPProxy(
     const CommonAPI::SomeIP::Address &_address,
     const std::shared_ptr<CommonAPI::SomeIP::ProxyConnection> &_connection)
-        : CommonAPI::SomeIP::Proxy(_address, _connection)
+        : CommonAPI::SomeIP::Proxy(_address, _connection),
+          otaExecutionStatus_(*this, 0x1b5b, CommonAPI::SomeIP::event_id_t(0x947a), CommonAPI::SomeIP::event_type_e::ET_EVENT , CommonAPI::SomeIP::reliability_type_e::RT_RELIABLE, false, std::make_tuple(static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr), static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr)))
 {
 }
 
@@ -54,6 +55,9 @@ OtaSomeIPProxy::~OtaSomeIPProxy() {
 }
 
 
+OtaSomeIPProxy::OtaExecutionStatusEvent& OtaSomeIPProxy::getOtaExecutionStatusEvent() {
+    return otaExecutionStatus_;
+}
 
 void OtaSomeIPProxy::triggerOta(std::string _sha256, uint64_t _size, CommonAPI::CallStatus &_internalCallStatus, std::string &_status, const CommonAPI::CallInfo *_info) {
     CommonAPI::Deployable< std::string, CommonAPI::SomeIP::StringDeployment> deploy_sha256(_sha256, static_cast< CommonAPI::SomeIP::StringDeployment* >(nullptr));

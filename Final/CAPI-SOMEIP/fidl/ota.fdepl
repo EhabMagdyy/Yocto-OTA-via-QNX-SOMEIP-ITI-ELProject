@@ -13,6 +13,12 @@ define org.genivi.commonapi.someip.deployment for interface commonapi.Ota {
         SomeIpMethodID = 6002
         SomeIpReliable = true
     }
+
+    broadcast otaExecutionStatus {
+        SomeIpEventID = 38010
+        SomeIpEventGroups = { 7003 }
+        SomeIpReliable = true
+    }
 }
 
 define org.genivi.commonapi.someip.deployment for provider as Service {
