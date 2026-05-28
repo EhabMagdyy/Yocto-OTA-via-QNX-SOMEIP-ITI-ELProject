@@ -1,6 +1,6 @@
 # 🚀 OTA Update Process — End-to-End Guide
 
-> **Full pipeline:** Host Dashboard → `send-ota.sh` → QNX Validation → SOME/IP Handshake → RPi3 Flashing → New Rootfs Running
+> ![Project Flow](projectflow.jpg)
 
 ---
 
