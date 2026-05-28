@@ -1,5 +1,11 @@
 fdt addr ${fdt_addr} && fdt get value bootargs /chosen bootargs
 
+# Create default active_slot if missing
+if test -z "${active_slot}"; then
+    setenv active_slot a
+    saveenv
+fi
+
 if test "${active_slot}" = "a"; then
     setenv rootpart 2
 else
