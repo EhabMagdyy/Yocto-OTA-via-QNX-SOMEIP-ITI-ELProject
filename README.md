@@ -63,10 +63,10 @@ The host operator uses a Qt/QML **Dashboard GUI** to select a built rootfs image
 │         5. pv | ssh ───────┼──────────────────────── image ───────► │
 │         6. ssh validate ───┼──────────────────────── trigger ─────► │
 └────────────────────────────┼────────────────────────────────────────┘
-                             │  SSH / SCP  (Ethernet)
+                             │  SSH / SCP  (Wifi)
                              ▼
 ┌────────────────────────────────────────────────────────────────────┐
-│                    QNX RPi4B  (192.168.50.100)                     │
+│                    QNX RPi4B  (192.168.1.15)                       │
 │                                                                    │
 │  /tmp/ota_manifest.txt     /tmp/ota_image.ext4                     │
 │           │                        │                               │
@@ -91,7 +91,7 @@ The host operator uses a Qt/QML **Dashboard GUI** to select a built rootfs image
 │      │  updateStatus("scp_done",    ...)  ──────────►│             │
 │      │  updateStatus("flashing",    ...)  ──────────►│             │
 │      └───────────────────────────────────────────────┘             │
-│                      │                                             │
+│                      │   (192.168.50.100)                          │
 │     SCP image ───────┼──────────────────────────────────────────►  │
 │     SSH ota.sh ──────┼──────────────────────────────────────────►  │
 └──────────────────────┼─────────────────────────────────────────────┘
