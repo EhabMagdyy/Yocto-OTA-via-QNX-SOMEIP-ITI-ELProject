@@ -576,4 +576,4 @@ Ensure `root@192.168.50.50` has a trusted SSH key from the QNX board: `ssh-copy-
 
 ---
 
-## [📄Project Demo Video](https://drive.google.com/file/d/1to1KnKyS0dTpQfOGbHn4IdG4mpJuht/view?usp=drive_link)
+## [📄Project Demo Video](https://drive.google.com/file/d/1to1KnKyS0r2dTpQfOGbHn4IdG4mpJuht/view)
