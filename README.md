@@ -571,10 +571,9 @@ Ensure `root@192.168.50.50` has a trusted SSH key from the QNX board: `ssh-copy-
 ## Author
 
 **Ehab** — Embedded Software Engineer
-ITI 9-Month Professional Diploma — Embedded Systems Track
 
 > ITI 9-Months Embedded Linux Course Project integrating Yocto Linux, QNX RTOS, CommonAPI SOME/IP, and Qt/QML into a production-grade OTA update pipeline for automotive-style embedded targets.
 
 ---
 
-*Last updated: May 2026*
+## [📄Project Demo Video](https://drive.google.com/file/d/1to1KnKyS0dTpQfOGbHn4IdG4mpJuht/view?usp=drive_link)
