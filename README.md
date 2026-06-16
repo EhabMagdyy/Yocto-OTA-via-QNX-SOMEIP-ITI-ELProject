@@ -1,6 +1,7 @@
 # 🚀 OTA Update Process — End-to-End Guide
 
 > **Full pipeline:** Host Dashboard → `send-ota.sh` → QNX Validation → SOME/IP Handshake → RPi3 Flashing → New Rootfs Running
+> <img width="1920" height="1080" alt="ELProcess" src="https://github.com/user-attachments/assets/18c51bc0-5997-45a1-8618-fd2ea175a89f" />
 
 ---
 
